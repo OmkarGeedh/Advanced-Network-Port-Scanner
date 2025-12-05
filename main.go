@@ -214,5 +214,55 @@ func main() {
 			bannerPreview)
 	}
 	fmt.Printf("\nTotal scan time: %s\n", elapsed)
-	// fmt.Printf("Scanned Host: %s | Ports: %d-%d\n", *host, *startPort, *endPort)
+
+	for {
+		fmt.Print("Do you want to run another scan? (y/n): ")
+		var again string
+		fmt.Scanln(&again)
+
+		if strings.ToLower(again) != "y" {
+			return
+		}
+
+		fmt.Print("Enter new host/IP: ")
+		fmt.Scanln(host)
+
+		fmt.Print("Enter new start port: ")
+		fmt.Scanln(startPort)
+
+		fmt.Print("Enter new end port: ")
+		fmt.Scanln(endPort)
+
+		fmt.Printf("Scanning %s from port %d to %d\n", *host, *startPort, *endPort)
+		startTime = time.Now()
+		results = scanPorts(*host, *startPort, *endPort, timeout)
+		elapsed = time.Since(startTime)
+
+		fmt.Printf("\nScan completed in %s\n", elapsed)
+		fmt.Printf("Found %d open ports:\n\n", len(results))
+		fmt.Println("PORT\tSTATUS\tSERVICE\tBANNER")
+		fmt.Println("----\t------\t-------\t------")
+		for _, result := range results {
+			status := "CLOSED"
+			service := "-"
+			bannerPreview := "-"
+
+			if result.State {
+				status = "OPEN"
+				service = result.Service
+				if len(result.Banner) > 30 {
+					bannerPreview = result.Banner[:30] + "..."
+				} else {
+					bannerPreview = result.Banner
+				}
+			}
+
+			fmt.Printf("%d\t%s\t%s\t%s\n",
+				result.Port,
+				status,
+				service,
+				bannerPreview)
+		}
+		fmt.Printf("\nTotal scan time: %s\n", elapsed)
+	}
 }
