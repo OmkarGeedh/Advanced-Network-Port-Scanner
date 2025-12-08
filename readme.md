@@ -11,32 +11,16 @@ This scanner supports **full-range scanning (1–65535)** with:
 Built as a **robust network vulnerability assessment tool**, it demonstrates Go’s strengths in developing security utilities.  
 The scanner rapidly probes ports, identifies the services running behind them, and provides detailed output for analysis — powered by multi-threading and structured result formats.
 
-## 🚀 Features
+## Features
 
-- **Full TCP Port Scanning**  
-  Scan any port range from `1–65535` with configurable timeout.
-
-- **High-Performance Multithreaded Engine**  
-  Uses goroutine concurrency with a semaphore (250 workers) for extremely fast scanning while preventing overload.
-
-- **Banner Grabbing**  
-  Automatically extracts banners from open ports for deeper fingerprinting and enumeration.
-
-- **Service & Version Detection**  
-  Detects common services such as:
-  `HTTP`, `HTTPS`, `SSH`, `MySQL`, `PostgreSQL`, `Redis`, and more — with version extraction when available.
-
-- **Real-Time Progress Bar**  
-  Displays scanning progress live in the terminal.
-
-- **Interactive Scan Mode**  
-  After finishing a scan, continue scanning new hosts without restarting the application.
-
-- **JSON Export Support**  
-  Export results in machine-readable format:
-  ```bash
-  -format json -output <filename.json>
-  ```
+- Fast **concurrent TCP port scanning** (1–65535)
+- **Banner grabbing** for service fingerprinting
+- **Automatic service & version detection**
+- **Progress indicator** during scan
+- **JSON export support**
+- **Configurable timeout & port range**
+- **Interactive multi-scan mode**
+- **Docker support for easy deployment**
 
 ## Installation
 Make sure **Go** is installed:
@@ -183,3 +167,4 @@ Do you want to run another scan? (y/n):
   }
 ]
 ```
+
