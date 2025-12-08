@@ -18,6 +18,9 @@ type ScanResult struct {
 	Version string
 }
 
+// for Logging banner
+var logMutex sync.Mutex
+
 func grabBanner(host string, port int, timeout time.Duration) (string, error) {
 	target := fmt.Sprintf("%s:%d", host, port)
 	conn, err := net.DialTimeout("tcp", target, timeout)
@@ -102,11 +105,12 @@ func identifyService(port int, banner string) (string, string) {
 }
 
 func scanPort(host string, port int, timeout time.Duration) ScanResult {
+
 	target := fmt.Sprintf("%s:%d", host, port)
 	conn, err := net.DialTimeout("tcp", target, timeout)
 
 	if err != nil {
-		return ScanResult{Port: port, State: false, Service: "-", Banner: "-"}
+		return ScanResult{Port: port, State: false}
 	}
 
 	conn.Close()
@@ -137,7 +141,6 @@ func scanPorts(host string, start, end int, timeout time.Duration) []ScanResult 
 
 	semaphore := make(chan struct{}, 100)
 
-	//concurrent
 	for port := start; port <= end; port++ {
 		wg.Add(1)
 		go func(p int) {
@@ -157,7 +160,9 @@ func scanPorts(host string, start, end int, timeout time.Duration) []ScanResult 
 	}()
 
 	for result := range resultChan {
-		results = append(results, result)
+		if result.State {
+			results = append(results, result)
+		}
 	}
 
 	return results
@@ -167,7 +172,7 @@ func main() {
 	// Define CLI flags
 	host := flag.String("host", "", "Target Host/IP address")
 	startPort := flag.Int("start", 1, "Start port number")
-	endPort := flag.Int("end", 100, "End port number")
+	endPort := flag.Int("end", 65000, "End port number")
 	timeoutMs := flag.Int("timeout", 800, "Timeout in milliseconds")
 
 	flag.Parse()
