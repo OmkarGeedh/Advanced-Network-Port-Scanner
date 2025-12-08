@@ -2,9 +2,11 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -139,7 +141,7 @@ func scanPorts(host string, start, end int, timeout time.Duration) []ScanResult 
 
 	resultChan := make(chan ScanResult, end-start+1)
 
-	semaphore := make(chan struct{}, 100)
+	semaphore := make(chan struct{}, 250)
 
 	for port := start; port <= end; port++ {
 		wg.Add(1)
@@ -172,9 +174,11 @@ func main() {
 	// Define CLI flags
 	host := flag.String("host", "", "Target Host/IP address")
 	startPort := flag.Int("start", 1, "Start port number")
-	endPort := flag.Int("end", 65000, "End port number")
+	endPort := flag.Int("end", 65535, "End port number")
 	timeoutMs := flag.Int("timeout", 800, "Timeout in milliseconds")
 
+	format := flag.String("format", "text", "Output format: text or json")
+	outputFile := flag.String("output", "", "Output file name for JSON")
 	flag.Parse()
 
 	if *host == "" {
@@ -219,6 +223,19 @@ func main() {
 			bannerPreview)
 	}
 	fmt.Printf("\nTotal scan time: %s\n", elapsed)
+
+	if *format == "json" {
+		jsonData, err := json.MarshalIndent(results, "", "  ")
+		if err != nil {
+			fmt.Println("Error generating JSON:", err)
+		} else if *outputFile != "" {
+			os.WriteFile(*outputFile, jsonData, 0644)
+			fmt.Printf("JSON saved to %s\n", *outputFile)
+		} else {
+			fmt.Println(string(jsonData))
+		}
+		return
+	}
 
 	for {
 		fmt.Print("Do you want to run another scan? (y/n): ")
