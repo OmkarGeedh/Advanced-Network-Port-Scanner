@@ -143,6 +143,9 @@ func scanPorts(host string, start, end int, timeout time.Duration) []ScanResult 
 
 	semaphore := make(chan struct{}, 250)
 
+	totalPorts := end - start + 1
+	progress := 0
+
 	for port := start; port <= end; port++ {
 		wg.Add(1)
 		go func(p int) {
@@ -153,6 +156,9 @@ func scanPorts(host string, start, end int, timeout time.Duration) []ScanResult 
 
 			result := scanPort(host, p, timeout)
 			resultChan <- result
+			progress++
+			fmt.Printf("\rScanning [%d/%d]", progress, totalPorts)
+			os.Stdout.Sync()
 		}(port)
 	}
 
